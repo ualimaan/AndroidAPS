@@ -71,12 +71,11 @@ jobs:
 
       - name: Build Release APK
         run: |
-          ./gradlew assembleFullRelease --stacktrace --info
-        env:
-          KEYSTORE_PATH: $GITHUB_WORKSPACE/androidaps.keystore
-          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          ./gradlew assembleFullRelease \
+            -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/androidaps.keystore" \
+            -Pandroid.injected.signing.store.password=${{ secrets.SIGNING_STORE_PASSWORD }} \
+            -Pandroid.injected.signing.key.alias=${{ secrets.SIGNING_KEY_ALIAS }} \
+            -Pandroid.injected.signing.key.password=${{ secrets.SIGNING_KEY_PASSWORD }}
 
       - name: Debug Build Output
         run: |
