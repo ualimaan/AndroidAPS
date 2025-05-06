@@ -46,13 +46,6 @@ jobs:
           echo "Keystore location: $GITHUB_WORKSPACE/androidaps.keystore"
           ls -l $GITHUB_WORKSPACE/androidaps.keystore
 
-      - name: Decode keystore file and validate format
-        run: |
-          if ! file "$GITHUB_WORKSPACE/androidaps.keystore" | grep -q "Java KeyStore"; then
-            echo "❌ Error: The decoded file doesn't appear to be a valid Java Keystore"
-            exit 1
-          fi
-
       - name: Basic keystore validation
         run: |
           keytool -list -v -keystore $GITHUB_WORKSPACE/androidaps.keystore -storepass ${{ secrets.SIGNING_STORE_PASSWORD }} -alias ${{ secrets.SIGNING_KEY_ALIAS }} > $GITHUB_WORKSPACE/keystore.txt

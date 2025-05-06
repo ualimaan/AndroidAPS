@@ -30,3 +30,7 @@ wear/pumpcontrol/*
 .kotlin/*
 /*.log
 *.preferences_pb
+*.jks
+*.keystore
+*.keystore.base64
+keystore.txt
