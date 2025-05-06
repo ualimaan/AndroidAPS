@@ -62,21 +62,35 @@ jobs:
           echo "SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD != '' && '✓' || '✗' }}"
           echo "SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD != '' && '✓' || '✗' }}"
 
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEY_BASE64 }}" > $GITHUB_WORKSPACE/androidaps.keystore.base64
+          base64 -d $GITHUB_WORKSPACE/androidaps.keystore.base64 > $GITHUB_WORKSPACE/androidaps.keystore
+          rm $GITHUB_WORKSPACE/androidaps.keystore.base64
+          echo "Keystore location: $GITHUB_WORKSPACE/androidaps.keystore"
+          ls -l $GITHUB_WORKSPACE/androidaps.keystore
+
+      - name: Keystore validation
+        run: |
+          keytool -list -v -keystore $GITHUB_WORKSPACE/androidaps.keystore -storepass ${{ secrets.SIGNING_STORE_PASSWORD }} -alias ${{ secrets.SIGNING_KEY_ALIAS }} > $GITHUB_WORKSPACE/keystore.txt
+          cat $GITHUB_WORKSPACE/keystore.txt
+
       - name: Build Release APK
         run: |
-          ./gradlew assembleRelease --stacktrace --info
-        env:
-          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
-
-      # - name: Generate APK SHA-256
-      #   run: |
-      #     echo "APK hash:"
-      #     sha256sum app/build/outputs/apk/full/release/app-full-release.apk
+          ./gradlew assembleFullRelease \
+            -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/androidaps.keystore" \
+            -Pandroid.injected.signing.store.password=${{ secrets.SIGNING_STORE_PASSWORD }} \
+            -Pandroid.injected.signing.key.alias=${{ secrets.SIGNING_KEY_ALIAS }} \
+            -Pandroid.injected.signing.key.password=${{ secrets.SIGNING_KEY_PASSWORD }}
 
       - name: Debug Build Output
-        run: ls -R app/build/outputs/
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Listing build outputs:"
+          ls -R app/build/outputs/
+          echo "Listing app directory:"
+          ls -R app/
 
       - name: Upload Artifact
         id: upload-artifact
