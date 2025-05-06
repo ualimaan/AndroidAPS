@@ -22,6 +22,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          repository: nightscout/AndroidAPS
+          ref: ${{ github.event.inputs.branch || 'master' }}
 
       - name: Signing on
         run: |
@@ -46,7 +49,7 @@ jobs:
           echo "Keystore location: $GITHUB_WORKSPACE/androidaps.keystore"
           ls -l $GITHUB_WORKSPACE/androidaps.keystore
 
-      - name: Basic keystore validation
+      - name: Keystore validation
         run: |
           keytool -list -v -keystore $GITHUB_WORKSPACE/androidaps.keystore -storepass ${{ secrets.SIGNING_STORE_PASSWORD }} -alias ${{ secrets.SIGNING_KEY_ALIAS }} > $GITHUB_WORKSPACE/keystore.txt
           cat $GITHUB_WORKSPACE/keystore.txt
