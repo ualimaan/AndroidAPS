@@ -102,7 +102,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-apk-watch
-          path: wear/build/outputs/apk/full/release/app-full-release.apk
+          path: wear/build/outputs/apk/full/release/wear-full-release.apk
           
       - name: Signing off
         run: |
