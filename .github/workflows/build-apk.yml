@@ -25,7 +25,9 @@ jobs:
         with:
           repository: nightscout/AndroidAPS
           ref: ${{ github.event.inputs.branch || 'master' }}
-          submodules: recursive
+
+      - name: Test Maven Central reachability
+        run: curl -I https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/2.2.0/kotlin-stdlib-2.2.0.pom
 
       - name: Signing on
         run: |
@@ -61,6 +63,10 @@ jobs:
           java-version: "21"
           distribution: "temurin"
           cache: gradle
+
+      - name: Clear Gradle caches
+        run: rm -rf ~/.gradle/caches ~/.gradle/wrapper
+
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
