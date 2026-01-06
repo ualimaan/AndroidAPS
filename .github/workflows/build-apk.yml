@@ -67,6 +67,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Clean Gradle & AAPT cache
+        run: |
+          echo "Cleaning Gradle caches"
+          ./gradlew clean --no-daemon
+
       - name: Build Release APK
         run: |
           ./gradlew assembleFullRelease \
