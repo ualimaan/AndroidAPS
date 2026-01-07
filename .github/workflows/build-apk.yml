@@ -56,12 +56,20 @@ jobs:
         with:
           java-version: "21"
           distribution: "temurin"
-          cache: gradle
+          cache: none
 
       - name: Clean Gradle cache
         run: |
           ./gradlew --stop || true
           rm -rf ~/.gradle/caches/
+          rm -rf ~/.gradle/wrapper/
+          rm -rf .gradle/  # Project-specific Gradle dir (includes configuration cache)
+
+      - name: Full cleanup
+        run: |
+          ./gradlew clean --no-daemon --no-parallel
+          rm -rf **/build/  # Deletes all module build dirs
+          rm -rf ~/.android/build-cache/
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -71,42 +79,20 @@ jobs:
 
       - name: Build Release APK
         run: |
-          # Try building with verbose output first to see the exact issue
-          ./gradlew assembleFullRelease --stacktrace \
+          ./gradlew assembleFullRelease --no-build-cache --stacktrace \
             -Dorg.gradle.jvmargs="-Xmx8g -XX:+UseParallelGC -Xss1024m" \
             -Dkotlin.daemon.jvm.options="-Xmx2g" \
             -Dkotlin.compiler.execution.strategy="in-process" \
             -Dorg.gradle.daemon=true \
             -Dorg.gradle.workers.max=8 \
-            -Dorg.gradle.caching=true \
+            -Dorg.gradle.caching=false \
             -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/androidaps.keystore" \
             -Pandroid.injected.signing.store.password=${{ secrets.SIGNING_STORE_PASSWORD }} \
             -Pandroid.injected.signing.key.alias=${{ secrets.SIGNING_KEY_ALIAS }} \
             -Pandroid.injected.signing.key.password=${{ secrets.SIGNING_KEY_PASSWORD }}
 
-      # Debug step if build fails
-      - name: Check build configuration
-        if: failure()
-        run: |
-          echo "=== Checking build configuration ==="
-          find . -name "*.gradle*" -type f | xargs grep -l "kotlin" | head -20
-          echo "=== Checking for version 2.2.0 ==="
-          grep -r "2\.2\.0" . --include="*.gradle*" --include="*.properties" || true
-          echo "=== Checking buildSrc configuration ==="
-          cat buildSrc/build.gradle* 2>/dev/null || echo "No buildSrc build.gradle found"
-
       - name: Debug Build Output
         run: |
-          echo "=== Current directory ==="
-          pwd
-          echo ""
-          echo "=== Full directory structure of build directories ==="
-          echo "--- app/build structure ---"
-          find app/build -type f -o -type d 2>/dev/null | sort || echo "No app/build directory"
-          echo ""
-          echo "--- wear/build structure ---"
-          find wear/build -type f -o -type d 2>/dev/null | sort || echo "No wear/build directory"
-          echo ""
           echo "=== All APK files found recursively ==="
           find . -name "*.apk" -type f 2>/dev/null | sort || echo "No APK files found"
           echo ""
