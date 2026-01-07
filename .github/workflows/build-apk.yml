@@ -102,12 +102,19 @@ jobs:
 
       - name: Debug Build Output
         run: |
-          echo "Current directory:"
+          echo "=== Current directory ==="
           pwd
-          echo "Listing build outputs:"
-          ls -R app/build/outputs/ 2>/dev/null || echo "No outputs directory"
-          echo "Listing app directory:"
-          ls -R app/ 2>/dev/null || echo "No app directory"
+          echo ""
+          echo "=== Full directory structure of build directories ==="
+          echo "--- app/build structure ---"
+          find app/build -type f -o -type d 2>/dev/null | sort || echo "No app/build directory"
+          echo ""
+          echo "--- wear/build structure ---"
+          find wear/build -type f -o -type d 2>/dev/null | sort || echo "No wear/build directory"
+          echo ""
+          echo "=== All APK files found recursively ==="
+          find . -name "*.apk" -type f 2>/dev/null | sort || echo "No APK files found"
+          echo ""
 
       - name: Upload Artifact
         id: upload-artifact-phone
