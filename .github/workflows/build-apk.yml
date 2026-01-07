@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: nightscout/AndroidAPS
-          ref: ${{ github.event.inputs.branch || 'master' }}
+          ref: efaabe8602a7c0238069e31f738b4ff60ef83233
 
       - name: Signing on
         run: |
